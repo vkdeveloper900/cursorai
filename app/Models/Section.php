@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class QuestionSection extends Model
+class Section extends Model
 {
     protected $fillable = [
         'name',
         'description',
+        'status'
     ];
 
     public function questions()
     {
-        return $this->hasMany(Question::class, 'section_id');
+        return $this->hasMany(Question::class);
     }
 }
+

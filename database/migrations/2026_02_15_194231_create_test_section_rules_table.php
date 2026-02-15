@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tests', function (Blueprint $table) {
+        Schema::create('test_section_rules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('section_id')->constrained('question_sections')->cascadeOnDelete();
-
-            $table->text('question_text');
-            $table->enum('difficulty', ['easy', 'medium', 'hard'])->default('easy');
-            $table->text('explanation')->nullable();
+            $table->unsignedBigInteger('test_section_id');
+            $table->enum('difficulty', ['easy', 'medium', 'hard']);
+            $table->integer('question_count');
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tests');
+        Schema::dropIfExists('test_section_rules');
     }
 };

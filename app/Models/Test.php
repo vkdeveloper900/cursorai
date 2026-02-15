@@ -7,15 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class Test extends Model
 {
     protected $fillable = [
-        'name',
-        'description',
+        'title',
+        'intro',
+        'instructions',
+        'difficulty',
         'total_time',
-        'rule_id',
+        'configuration',
+        'status'
     ];
 
-    public function rule()
-    {
-        return $this->belongsTo(Rule::class);
-    }
+    protected $casts = [
+        'configuration' => 'array',
+    ];
 
+    public function testSections()
+    {
+        return $this->hasMany(TestSection::class);
+    }
 }
+

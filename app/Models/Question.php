@@ -9,12 +9,19 @@ class Question extends Model
     protected $fillable = [
         'section_id',
         'question_text',
+        'question_type',
         'difficulty',
-        'explanation',
+        'status'
     ];
 
     public function section()
     {
-        return $this->belongsTo(QuestionSection::class, 'section_id');
+        return $this->belongsTo(Section::class);
+    }
+
+    public function options()
+    {
+        return $this->hasMany(QuestionOption::class);
     }
 }
+

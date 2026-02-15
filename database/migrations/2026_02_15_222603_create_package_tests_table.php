@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rules', function (Blueprint $table) {
+        Schema::create('package_tests', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->json('config')->nullable();
+            $table->unsignedBigInteger('package_id');
+            $table->unsignedBigInteger('test_id');
             $table->timestamps();
+
+            $table->unique(['package_id', 'test_id']);
         });
+
     }
 
     /**
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rules');
+        Schema::dropIfExists('package_tests');
     }
 };

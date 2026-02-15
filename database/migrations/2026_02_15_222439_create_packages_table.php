@@ -11,12 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('packages', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // GK, Chemistry
+            $table->string('name');
+            $table->string('slug')->unique();
             $table->text('description')->nullable();
+            $table->decimal('price', 10, 2)->default(0);
+            $table->integer('validity_days')->nullable();   // 30, 90
+            $table->integer('attempt_limit')->nullable();   // per test
+            $table->boolean('status')->default(1);
             $table->timestamps();
         });
+
+
     }
 
     /**
@@ -24,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('packages');
     }
 };
