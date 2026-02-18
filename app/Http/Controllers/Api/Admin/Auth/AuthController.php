@@ -17,12 +17,18 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $data['name'] = $data['first_name'].' '.$data['last_name'];
 
+        $data['name'] = $data['first_name'] . ' ' . $data['last_name'];
+
+        // create admin
         $admin = Admin::create($data);
 
+        // create token
         $tokenName = $request->string('device_name')->toString() ?: 'admin-api';
-        $plainTextToken = $admin->createToken($tokenName)->plainTextToken;
+        $token = $admin->createToken($tokenName)->plainTextToken;
+
+        // load role & permissions
+        $admin->load('role.permissions');
 
         return response()->json([
             'message' => 'Admin registered successfully.',
@@ -34,8 +40,12 @@ class AuthController extends Controller
                     'email' => $admin->email,
                     'mobile' => $admin->mobile,
                     'status' => $admin->status,
+                    'role' => $admin->role?->slug,
+                    'permissions' => $admin->role
+                        ? $admin->role->permissions->pluck('key')->values()
+                        : [],
                 ],
-                'token' => $plainTextToken,
+                'token' => $token,
                 'token_type' => 'Bearer',
             ],
         ], 201);
@@ -47,7 +57,11 @@ class AuthController extends Controller
             ->where('email', $request->validated('email'))
             ->first();
 
-        if (! $admin || $admin->status !== 'active' || ! Hash::check($request->validated('password'), $admin->password)) {
+        if (
+            !$admin ||
+            $admin->status !== 'active' ||
+            !Hash::check($request->validated('password'), $admin->password)
+        ) {
             return response()->json([
                 'message' => $admin && $admin->status !== 'active'
                     ? 'Account is inactive.'
@@ -55,8 +69,12 @@ class AuthController extends Controller
             ], $admin && $admin->status !== 'active' ? 403 : 401);
         }
 
+        //  role + permissions eager load
+        $admin->load('role.permissions');
+
+        // create token
         $tokenName = $request->string('device_name')->toString() ?: 'admin-api';
-        $plainTextToken = $admin->createToken($tokenName)->plainTextToken;
+        $token = $admin->createToken($tokenName)->plainTextToken;
 
         return response()->json([
             'message' => 'Admin logged in successfully.',
@@ -68,8 +86,12 @@ class AuthController extends Controller
                     'email' => $admin->email,
                     'mobile' => $admin->mobile,
                     'status' => $admin->status,
+                    'role' => $admin->role?->slug,
+                    'permissions' => $admin->role
+                        ? $admin->role->permissions->pluck('key')->values()
+                        : [],
                 ],
-                'token' => $plainTextToken,
+                'token' => $token,
                 'token_type' => 'Bearer',
             ],
         ], 200);
@@ -77,7 +99,7 @@ class AuthController extends Controller
 
     public function logout(): JsonResponse
     {
-        /** @var \App\Models\Admin $admin */
+        /** @var Admin $admin */
         $admin = request()->user();
 
         $admin->currentAccessToken()?->delete();
@@ -94,13 +116,13 @@ class AuthController extends Controller
     {
         $admin = Admin::where('email', $request->validated('email'))->first();
 
-        if (! $admin || $admin->status !== 'active') {
+        if (!$admin || $admin->status !== 'active') {
             return response()->json([
                 'message' => 'If this admin exists and is active, an OTP has been sent.',
             ], 200);
         }
 
-        $code = (string) random_int(100000, 999999);
+        $code = (string)random_int(100000, 999999);
 
         LoginOtp::create([
             'user_id' => null,
@@ -128,7 +150,7 @@ class AuthController extends Controller
     {
         $admin = Admin::where('email', $request->validated('email'))->first();
 
-        if (! $admin || $admin->status !== 'active') {
+        if (!$admin || $admin->status !== 'active') {
             return response()->json([
                 'message' => 'Invalid OTP or email.',
             ], 422);
@@ -142,7 +164,7 @@ class AuthController extends Controller
             ->latest()
             ->first();
 
-        if (! $otp || $otp->code !== $request->validated('code')) {
+        if (!$otp || $otp->code !== $request->validated('code')) {
             return response()->json([
                 'message' => 'Invalid or expired OTP.',
             ], 422);
@@ -152,6 +174,7 @@ class AuthController extends Controller
 
         $tokenName = $request->string('device_name')->toString() ?: 'admin-2fa';
         $plainTextToken = $admin->createToken($tokenName)->plainTextToken;
+        $admin->load('role.permissions');
 
         return response()->json([
             'message' => 'Admin logged in successfully with 2-step verification.',
@@ -163,6 +186,10 @@ class AuthController extends Controller
                     'email' => $admin->email,
                     'mobile' => $admin->mobile,
                     'status' => $admin->status,
+                    'role' => $admin->role?->slug,
+                    'permissions' => $admin->role
+                        ? $admin->role->permissions->pluck('key')->values()
+                        : [],
                 ],
                 'token' => $plainTextToken,
                 'token_type' => 'Bearer',

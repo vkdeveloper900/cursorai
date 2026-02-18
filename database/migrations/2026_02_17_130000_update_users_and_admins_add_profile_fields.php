@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
@@ -19,7 +18,8 @@ return new class extends Migration
         });
 
         Schema::table('admins', function (Blueprint $table) {
-            $table->string('first_name')->nullable()->after('id');
+            $table->unsignedBigInteger('role_id')->after('id')->default(1);
+            $table->string('first_name')->nullable()->after('role_id');
             $table->string('last_name')->nullable()->after('first_name');
             $table->string('mobile', 20)->nullable()->after('last_name');
             $table->string('status', 20)->default('active')->after('mobile');
