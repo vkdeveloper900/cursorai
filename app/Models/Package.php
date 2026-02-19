@@ -15,5 +15,7 @@ class Package extends Model
     {
         return $this->belongsToMany(Test::class, 'package_tests');
     }
+
+
 }
 
