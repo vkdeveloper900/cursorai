@@ -28,6 +28,10 @@ Route::get('init', function () {
     return response()->json(['message' => 'Api Running.']);
 });
 
+Route::get('deploy', function () {
+    return response()->json(['message' => 'Api Running.']);
+});
+
 /*
 |--------------------------------------------------------------------------
 | QUESTION SAMPLE DOWNLOAD (PUBLIC)
