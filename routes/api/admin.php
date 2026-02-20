@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Admin\Test\Question\QuestionController;
 use App\Http\Controllers\Api\Admin\Test\Section\SectionController;
 use App\Http\Controllers\Api\Admin\Test\TestController;
 use App\Http\Controllers\Api\Admin\Test\TestSection\TestSectionController;
+use App\Http\Controllers\Api\TestNotificationController;
 use App\Http\Controllers\Api\User\Test\TestQuestionController;
 use App\Http\Middleware\Permissions\CheckPermission;
 use Illuminate\Http\Request;
@@ -31,6 +32,8 @@ Route::get('init', function () {
 Route::get('deploy', function () {
     return response()->json(['message' => 'Api Running.']);
 });
+
+Route::get('/test-whatsapp', [TestNotificationController::class, 'sendWhatsapp']);
 
 /*
 |--------------------------------------------------------------------------
