@@ -26,7 +26,7 @@ class UserPackageController extends Controller
 
                 return [
                     'id' => $package->id,
-                    'title' => $package->title,
+                    'title' => $package->name,
                     'description' => $package->description,
                     'price' => $package->price,
                     'validity_days' => $package->validity_days,

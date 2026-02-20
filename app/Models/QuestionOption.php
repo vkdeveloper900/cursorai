@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuestionOption extends Model
 {
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+
     protected $fillable = [
         'question_id',
         'option_text',

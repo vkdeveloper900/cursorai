@@ -3,6 +3,8 @@
 namespace Tests\Feature\Api;
 
 use App\Models\Admin;
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -14,6 +16,8 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_can_register_and_receive_token(): void
     {
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin']);
+
         $response = $this->postJson('/api/admin/auth/register', [
             'first_name' => 'Admin',
             'last_name' => 'One',
@@ -22,6 +26,7 @@ class AdminAuthTest extends TestCase
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'device_name' => 'tests',
+            'role_id' => $role->id,
         ]);
 
         $response->assertCreated();
@@ -40,9 +45,15 @@ class AdminAuthTest extends TestCase
 
     public function test_admin_can_login_and_access_admin_me(): void
     {
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin']);
+        $permission1 = Permission::create(['name' => 'Create Package', 'key' => 'package.create', 'group' => 'package']);
+        $permission2 = Permission::create(['name' => 'Update Package', 'key' => 'package.update', 'group' => 'package']);
+        $role->permissions()->attach([$permission1->id, $permission2->id]);
+
         $admin = Admin::factory()->create([
             'email' => 'admin@example.com',
             'password' => 'password123',
+            'role_id' => $role->id,
         ]);
 
         $login = $this->postJson('/api/admin/auth/login', [
@@ -70,7 +81,7 @@ class AdminAuthTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $login = $this->postJson('/api/auth/login', [
+        $login = $this->postJson('/api/user/auth/login', [
             'email' => $user->email,
             'password' => 'password123',
             'device_name' => 'tests',
@@ -101,7 +112,7 @@ class AdminAuthTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer '.$token,
-        ])->getJson('/api/user');
+        ])->getJson('/api/user/init');
 
         $response->assertStatus(403);
     }

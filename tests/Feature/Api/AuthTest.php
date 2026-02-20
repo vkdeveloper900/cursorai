@@ -13,7 +13,7 @@ class AuthTest extends TestCase
 
     public function test_user_can_register_and_receive_token(): void
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson('/api/user/auth/register', [
             'first_name' => 'Ada',
             'last_name' => 'Lovelace',
             'dob' => '2000-01-01',
@@ -39,7 +39,7 @@ class AuthTest extends TestCase
 
     public function test_register_validates_input(): void
     {
-        $response = $this->postJson('/api/auth/register', []);
+        $response = $this->postJson('/api/user/auth/register', []);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['first_name', 'last_name', 'dob', 'email', 'password']);
@@ -48,7 +48,7 @@ class AuthTest extends TestCase
     public function test_register_validation_returns_json_even_without_accept_header(): void
     {
         // This mimics Postman/browser-like requests that may not send Accept: application/json.
-        $response = $this->post('/api/auth/register', []);
+        $response = $this->post('/api/user/auth/register', []);
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['first_name', 'last_name', 'dob', 'email', 'password']);
@@ -61,7 +61,7 @@ class AuthTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson('/api/user/auth/login', [
             'email' => 'grace@example.com',
             'password' => 'password123',
             'device_name' => 'tests',
@@ -87,7 +87,7 @@ class AuthTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson('/api/user/auth/login', [
             'email' => 'user@example.com',
             'password' => 'wrong-password',
         ]);
@@ -97,7 +97,7 @@ class AuthTest extends TestCase
 
     public function test_logout_requires_authentication(): void
     {
-        $response = $this->postJson('/api/auth/logout');
+        $response = $this->postJson('/api/user/auth/logout');
 
         $response->assertUnauthorized();
     }
@@ -105,7 +105,7 @@ class AuthTest extends TestCase
     public function test_logout_unauthenticated_returns_json_even_without_accept_header(): void
     {
         // Mimic Postman requests without Accept: application/json.
-        $response = $this->post('/api/auth/logout');
+        $response = $this->post('/api/user/auth/logout');
 
         $response->assertStatus(401);
         $response->assertJson([
@@ -119,7 +119,7 @@ class AuthTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $loginResponse = $this->postJson('/api/auth/login', [
+        $loginResponse = $this->postJson('/api/user/auth/login', [
             'email' => $user->email,
             'password' => 'password123',
             'device_name' => 'tests',
@@ -131,7 +131,7 @@ class AuthTest extends TestCase
 
         $logoutResponse = $this->withHeaders([
             'Authorization' => 'Bearer '.$plainTextToken,
-        ])->postJson('/api/auth/logout');
+        ])->postJson('/api/user/auth/logout');
 
         $logoutResponse->assertOk();
 
